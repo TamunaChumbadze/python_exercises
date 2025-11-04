@@ -36,21 +36,26 @@ class User:
     
 
 class Admin(User):
-    """A class representing on adminisstrator, a special kind of user."""
+    """A class representing an administrator, a special kind of user."""
     def __init__(self, first_name, last_name, age, email):
         super().__init__(first_name, last_name, age, email)
         self.privileges = []
 
     def show_privileges(self):
-        print("Admin Privileges:")
+        """Display the admin's privileges."""
+        print(f"\nAdmin: {self.first_name} {self.last_name}, Age: {self.age}, Email: {self.email}")
+        print("Privileges:")
         for privilege in self.privileges:
             print(f" - {privilege}")
 
+
+
 admin_user = Admin("Tamuna", "Chumbadze", 33, "t.chumbadze@gmail.com")
-admin_user.privileges = [ 
-    "can add posts", 
-    "can delete posts", 
-    "can ban user", 
-    "can create advertisments"
-    ]
+admin_user.privileges = [
+    "can add posts",
+    "can delete posts",
+    "can ban user",
+    "can create advertisements"
+]
+
 admin_user.show_privileges()
