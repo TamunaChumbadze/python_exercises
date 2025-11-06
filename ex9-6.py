@@ -40,11 +40,15 @@ class IceCreamStand(Restaurant):
     """A class representing an ice cream stand, a specific kind of restaurant."""
     def __init__(self, restaurant, cuisine):
         super().__init__(restaurant, cuisine)
-        self.flavors = ["chocolate", "vanilla", "Strawberry"]
-    def disflay_flavors(self):
+        self.flavors = []  # empty list by default
+    
+    def display_flavors(self):
+        """Display the available ice cream flavors."""
         print("Available ice cream flavors:")
         for flavor in self.flavors:
-            print(f"- {flavor}")
+            print(f"- {flavor.title()}")
 
-my_stand = IceCreamStand("Sweet Ice", "Dessert")
-my_stand.disflay_flavors()
+
+my_stand = IceCreamStand("Sweet Ice", "Ice Cream")
+my_stand.flavors = ["vanilla", "chocolate", "strawberry"]
+my_stand.display_flavors()

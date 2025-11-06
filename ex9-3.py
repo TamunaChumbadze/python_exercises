@@ -20,7 +20,7 @@ class User:
         print(f"User's First Name: {self.first_name}")
         print(f"User's Last Name: {self.last_name}")
         print(f"User's Age: {self.age}")
-        print(f"User's Email: {self.email}")
+        print(f"User's Email: {self.email}\n")
     
     def greet_user(self):
         print(f"Hello, {self.first_name} {self.last_name} ! Welcome back!")
