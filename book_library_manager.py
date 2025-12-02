@@ -3,10 +3,10 @@ Project Title: “Book Library Manager”
 Project description: A Python application to manage a personal book library, allowing users to add, remove, search, and organize their book collection.
 Functionality:
 1. Add Books: Users can add new books to their library with details such as title, author, genre, and publication year.
-2. Remove Books: Users can remove books from their library by title or author.
+2. Remove Books: Users can remove books from their library by ID.
 3. Search Books: Users can search for books by title, author, or genre.
 4. Update Book Details: Users can update the details of existing books in their library.
-5. Save Data: The application saves the book collection to a file and loads it upon startup.
+5. Save Data: The application saves the book collection to a file and loads it upon startup.(JSON;CSV)
 6. Load Data: The application loads the book collection from a file when started.
 """
 
@@ -14,6 +14,7 @@ import json
 import sys
 import csv
 import requests # pyright: ignore[reportMissingModuleSource]
+
 # -------------------------
 # კლასი BOOK
 # -------------------------
