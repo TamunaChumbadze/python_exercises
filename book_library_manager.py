@@ -13,7 +13,7 @@ Functionality:
 import json
 import sys
 import csv
-
+import requests # pyright: ignore[reportMissingModuleSource]
 # -------------------------
 # კლასი BOOK
 # -------------------------
@@ -36,6 +36,7 @@ class Book:
         return f"ID: {self.book_id} | Title: {self.title} | Author: {self.author} | Genre: {self.genre} | Year: {self.publication_year}"
     
     def to_dict(self):
+
         return {
             'book_id': self.book_id,
             'title': self.title,
@@ -52,6 +53,11 @@ class Library:
         self.books = []
 
     def add_book(self, title, author, genre, publication_year):
+        title = title.strip()
+        author = author.strip()
+        if not title or not author:
+            print("❌ Cannot add book with empty Title or Author.")
+            return False
 
         for book in self.books:
             if book.title.lower() == title.lower() and \
@@ -63,6 +69,47 @@ class Library:
         self.books.append(new_book)
         print(f"✅ Book '{title}' added to the library (ID: {new_book.book_id}).")
         return True
+    
+    def add_book_by_isbn(self, isbn):
+        isbn = isbn.strip()
+        if not isbn:
+            print("❌ ISBN cannot be empty!")
+            return
+        url = f"https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}&format=json&jscmd=data"
+        try:
+            response = requests.get(url, timeout=15)
+            response.raise_for_status()
+            data = response.json()
+        except requests.RequestException as e:
+            print(f"❌ Error fetching data from Open Library: {e}")
+            data = {}
+        
+        book_data = data.get(f"ISBN:{isbn}")
+
+        if book_data:
+            title = book_data.get("title", "").strip()
+            authors = book_data.get("authors", [])
+            author = authors[0]["name"].strip() if authors else ""
+            year = book_data.get("publish_date", "").split()[-1]
+            try:
+                year = int(year)
+            except:
+                year = 0
+
+            print(f"✅ Found book: {title} by {author}, Year: {year}")
+            self.add_book(title, author, "", year)
+        
+        else:
+            print("❌ Book not found with this ISBN. Please enter manually.")
+            title = input("Enter Title: ").strip()
+            author = input("Enter Author: ").strip()
+            genre = input("Enter Genre: ").strip()
+            year_input = input("Enter Publication Year: ").strip()
+            try:
+                year = int(year_input)
+            except:
+                year = 0
+            self.add_book(title, author, genre, year)
 
     def view_all_books(self):
         if not self.books:
@@ -154,27 +201,23 @@ class Library:
             print(f"❌ Error saving data: {e}")
     
     def save_data_csv(self):
-        # ველების სახელები (CSV ფაილის სათაურის ხაზი)
         fieldnames = ['book_id', 'title', 'author', 'genre', 'publication_year']
-        
-        # წიგნების მონაცემების მიღება ლექსიკონების სახით
         list_of_dicts = [book.to_dict() for book in self.books]
 
         try:
-            # ფაილის გახსნა 'w' (write) რეჟიმში
             with open("library_data.csv", "w", newline='', encoding='utf-8') as file:
-                # DictWriter-ის შექმნა
                 writer = csv.DictWriter(file, fieldnames=fieldnames)
-                
-                # სათაურის (ჰედერების) ჩაწერა
                 writer.writeheader()
-                
-                # მონაცემების ჩაწერა
-                writer.writerows(list_of_dicts)
-                
+                writer.writerows(list_of_dicts)  
             print("✅ Library data successfully saved to 'library_data.csv'.")
         except Exception as e:
             print(f"❌ Error saving CSV data: {e}")
+
+    def save_all_data(self):
+        self.save_data()
+        self.save_data_csv()
+        print("✅ Library data saved successfully (JSON + CSV).")
+
 
     def load_data(self):
         try:
@@ -203,29 +246,33 @@ def main():
         print("3️⃣  Search Book")
         print("4️⃣  Remove Book")
         print("5️⃣  Update Book")
-        print("6️⃣  Save Data (JSON)")
+        print("6️⃣  Save Data (JSON + CSV)")
         print("7️⃣  Load Data (JSON)")
-        print("8️⃣  Save Data to CSV")
-        print("9️⃣  Exit")
-        choice = input("👉 Choose an option (1-9): ").strip()
+        print("8️⃣  Exit")
+        choice = input("👉 Choose an option (1-8): ").strip()
 
         if choice == '1':
             print("\n📘 ADD NEW BOOK")
-            title = input("Enter Title: ").strip()
-            author = input("Enter Author: ").strip()
-            genre = input("Enter Genre: ").strip()
-            year = input("Enter Publication Year: ").strip()
-            if not title or not author or not genre or not year:
-                print("❌ Title, Author, and Year cannot be empty! Please try again!")
+            use_isbn = input("Do you want to add by ISBN? (y/n): ").strip().lower()
+            if use_isbn == 'y':
+                isbn = input("Enter ISBN: ").strip()
+                library.add_book_by_isbn(isbn)
+                library.save_all_data()
             else:
+                title = input("Enter Title: ").strip()
+                author = input("Enter Author: ").strip()
+                genre = input("Enter Genre: ").strip()
+                year = input("Enter Publication Year: ").strip()
+                if not title or not author or not genre or not year:
+                    print("❌ Title, Author, and Year cannot be empty! Please try again!")
+                else:
 
-                try:
-                    year = int(year)
-                    library.add_book(title, author, genre, year)
-                    library.save_data()
-                    library.save_data_csv()
-                except ValueError:
-                    print("❌ Invalid year! Must be a number.")
+                    try:
+                        year = int(year)
+                        library.add_book(title, author, genre, year)
+                        library.save_all_data()
+                    except ValueError:
+                        print("❌ Invalid year! Must be a number.")
 
         elif choice == '2':
             print("\n📚 ALL BOOKS IN LIBRARY")
@@ -240,30 +287,28 @@ def main():
             print("\n❌ REMOVE BOOK")
             book_id = input("Enter Book ID: ").strip()
             library.remove_book(book_id)
+            library.save_all_data()
 
         elif choice == '5':
             print("\n✏️ UPDATE BOOK INFO")
             book_id = input("Enter Book ID: ").strip()
             library.update_book(book_id)
+            library.save_all_data()
 
         elif choice == '6':
-            print("\n💾 Saving data...")
-            library.save_data()
+            print("\n💾 Saving all data...")
+            library.save_all_data()
 
         elif choice == '7':
             print("\n📂 Loading data...")
             library.load_data()
 
         elif choice == '8':
-            print("\n📄 Saving CSV...")
-            library.save_data_csv()
-
-        elif choice == '9':
             print("\n👋 Exiting... Goodbye!")
             sys.exit()
 
         else:
-            print("❌ Invalid choice. Enter a number 1-9.")
+            print("❌ Invalid choice. Enter a number 1-8.")
 
 
 if __name__ == "__main__":
