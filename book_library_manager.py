@@ -295,29 +295,6 @@ def main():
                     use_isbn = retry
                     continue
 
-        # if choice == '1':
-        #     print("\n📘 ADD NEW BOOK")
-        #     use_isbn = input("Do you want to add by ISBN? (y/n): ").strip().lower()
-        #     if use_isbn == 'y':
-        #         isbn = input("Enter ISBN: ").strip()
-        #         library.add_book_by_isbn(isbn)
-        #         library.save_all_data()
-        #     else:
-        #         title = input("Enter Title: ").strip()
-        #         author = input("Enter Author: ").strip()
-        #         genre = input("Enter Genre: ").strip()
-        #         year = input("Enter Publication Year: ").strip()
-        #         if not title or not author or not genre or not year:
-        #             print("❌ Title, Author, and Year cannot be empty! Please try again!")
-        #         else:
-
-        #             try:
-        #                 year = int(year)
-        #                 library.add_book(title, author, genre, year)
-        #                 library.save_all_data()
-        #             except ValueError:
-        #                 print("❌ Invalid year! Must be a number.")
-
         elif choice == '2':
             print("\n📚 ALL BOOKS IN LIBRARY")
             library.view_all_books()
